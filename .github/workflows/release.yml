@@ -1,0 +1,159 @@
+name: Build and Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Release version (e.g., 1.0.0)'
+        required: true
+        type: string
+
+jobs:
+  build-and-release:
+    runs-on: macos-14
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Swift
+        uses: swift-actions/setup-swift@v2
+        with:
+          swift-version: "5.9"
+
+      - name: Get version
+        id: version
+        run: |
+          if [[ "$GITHUB_REF" == refs/tags/* ]]; then
+            VERSION=${GITHUB_REF#refs/tags/v}
+          else
+            VERSION=${{ github.event.inputs.version }}
+            # Create tag for manual dispatch
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+            git tag -a "v$VERSION" -m "Release v$VERSION"
+            git push origin "v$VERSION"
+          fi
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "tag=v$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Generate App Icon
+        run: |
+          chmod +x scripts/generate-icon.swift
+          swift scripts/generate-icon.swift
+
+      - name: Build executable
+        run: swift build -c release
+
+      - name: Create App Bundle
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+
+          # Create app bundle structure
+          mkdir -p OzLand.app/Contents/MacOS
+          mkdir -p OzLand.app/Contents/Resources
+
+          # Copy executable
+          cp .build/release/OzLand OzLand.app/Contents/MacOS/
+
+          # Copy Info.plist
+          cp Info.plist OzLand.app/Contents/
+
+          # Copy icon
+          cp Assets/AppIcon.icns OzLand.app/Contents/Resources/
+
+          # Update Info.plist
+          /usr/libexec/PlistBuddy -c "Add :CFBundleExecutable string OzLand" OzLand.app/Contents/Info.plist 2>/dev/null || \
+            /usr/libexec/PlistBuddy -c "Set :CFBundleExecutable OzLand" OzLand.app/Contents/Info.plist
+
+          /usr/libexec/PlistBuddy -c "Add :CFBundleIdentifier string com.ozland.app" OzLand.app/Contents/Info.plist 2>/dev/null || \
+            /usr/libexec/PlistBuddy -c "Set :CFBundleIdentifier com.ozland.app" OzLand.app/Contents/Info.plist
+
+          /usr/libexec/PlistBuddy -c "Add :CFBundleName string OzLand" OzLand.app/Contents/Info.plist 2>/dev/null || \
+            /usr/libexec/PlistBuddy -c "Set :CFBundleName OzLand" OzLand.app/Contents/Info.plist
+
+          /usr/libexec/PlistBuddy -c "Add :CFBundleVersion string $VERSION" OzLand.app/Contents/Info.plist 2>/dev/null || \
+            /usr/libexec/PlistBuddy -c "Set :CFBundleVersion $VERSION" OzLand.app/Contents/Info.plist
+
+          /usr/libexec/PlistBuddy -c "Add :CFBundleShortVersionString string $VERSION" OzLand.app/Contents/Info.plist 2>/dev/null || \
+            /usr/libexec/PlistBuddy -c "Set :CFBundleShortVersionString $VERSION" OzLand.app/Contents/Info.plist
+
+          /usr/libexec/PlistBuddy -c "Add :CFBundlePackageType string APPL" OzLand.app/Contents/Info.plist 2>/dev/null || \
+            /usr/libexec/PlistBuddy -c "Set :CFBundlePackageType APPL" OzLand.app/Contents/Info.plist
+
+          /usr/libexec/PlistBuddy -c "Add :CFBundleIconFile string AppIcon" OzLand.app/Contents/Info.plist 2>/dev/null || \
+            /usr/libexec/PlistBuddy -c "Set :CFBundleIconFile AppIcon" OzLand.app/Contents/Info.plist
+
+          /usr/libexec/PlistBuddy -c "Add :LSMinimumSystemVersion string 13.0" OzLand.app/Contents/Info.plist 2>/dev/null || \
+            /usr/libexec/PlistBuddy -c "Set :LSMinimumSystemVersion 13.0" OzLand.app/Contents/Info.plist
+
+          /usr/libexec/PlistBuddy -c "Add :LSUIElement bool true" OzLand.app/Contents/Info.plist 2>/dev/null || \
+            /usr/libexec/PlistBuddy -c "Set :LSUIElement true" OzLand.app/Contents/Info.plist
+
+      - name: Create DMG
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          DMG_NAME="OzLand-${VERSION}.dmg"
+          TEMP_DMG="temp.dmg"
+          VOLUME_NAME="OzLand"
+
+          # Create dmg contents
+          mkdir -p dmg-contents
+          cp -R OzLand.app dmg-contents/
+          ln -s /Applications dmg-contents/Applications
+
+          # Create temporary DMG
+          hdiutil create -srcfolder "dmg-contents" -volname "$VOLUME_NAME" -fs HFS+ \
+            -fsargs "-c c=64,a=16,e=16" -format UDRW -size 200m "$TEMP_DMG"
+
+          # Clean up
+          rm -rf dmg-contents
+
+          # Mount the DMG
+          DEVICE=$(hdiutil attach -readwrite -noverify -noautoopen "$TEMP_DMG" | egrep '^/dev/' | sed 1q | awk '{print $1}')
+          sleep 3
+
+          # Unmount
+          hdiutil detach "$DEVICE" || true
+
+          # Convert to compressed DMG
+          hdiutil convert "$TEMP_DMG" -format UDZO -imagekey zlib-level=9 -o "$DMG_NAME"
+          rm -f "$TEMP_DMG"
+
+          echo "DMG_NAME=$DMG_NAME" >> $GITHUB_ENV
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ${{ env.DMG_NAME }}
+          tag_name: ${{ steps.version.outputs.tag }}
+          name: OzLand ${{ steps.version.outputs.version }}
+          body: |
+            ## OzLand ${{ steps.version.outputs.version }}
+
+            Dynamic Island style Spotify controller for macOS.
+
+            ### Installation
+
+            1. Download `OzLand-${{ steps.version.outputs.version }}.dmg`
+            2. Open the DMG file
+            3. Drag **OzLand.app** to **Applications** folder
+            4. Launch OzLand from Applications
+            5. Grant Accessibility permissions when prompted
+
+            ### Requirements
+
+            - macOS 13.0 (Ventura) or later
+            - Spotify Desktop App
+          generate_release_notes: true
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

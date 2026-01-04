@@ -1,0 +1,73 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    name: Build & Test
+    runs-on: macos-14
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Swift
+        uses: swift-actions/setup-swift@v2
+        with:
+          swift-version: "5.9"
+
+      - name: Cache Swift packages
+        uses: actions/cache@v4
+        with:
+          path: .build
+          key: ${{ runner.os }}-swift-${{ hashFiles('Package.resolved') }}
+          restore-keys: |
+            ${{ runner.os }}-swift-
+
+      - name: Build (Debug)
+        run: swift build
+
+      - name: Build (Release)
+        run: swift build -c release
+
+      - name: Run Tests
+        run: swift test
+
+      - name: Generate App Icon
+        run: |
+          chmod +x scripts/generate-icon.swift
+          swift scripts/generate-icon.swift
+
+      - name: Verify App Bundle Creation
+        run: |
+          # Create app bundle to verify it works
+          mkdir -p OzLand.app/Contents/MacOS
+          mkdir -p OzLand.app/Contents/Resources
+          cp .build/release/OzLand OzLand.app/Contents/MacOS/
+          cp Info.plist OzLand.app/Contents/
+          cp Assets/AppIcon.icns OzLand.app/Contents/Resources/
+
+          # Verify files exist
+          test -f OzLand.app/Contents/MacOS/OzLand
+          test -f OzLand.app/Contents/Info.plist
+          test -f OzLand.app/Contents/Resources/AppIcon.icns
+
+          echo "App bundle created successfully"
+
+  lint:
+    name: Swift Lint
+    runs-on: macos-14
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install SwiftLint
+        run: brew install swiftlint
+
+      - name: Run SwiftLint
+        run: swiftlint lint --reporter github-actions-logging || true
