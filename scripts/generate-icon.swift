@@ -19,6 +19,45 @@ let iconSizes: [(name: String, size: Int)] = [
     ("icon_512x512@2x", 1024)
 ]
 
+func drawEqualizerBars(context: CGContext, size: CGFloat, pillX: CGFloat, pillY: CGFloat, pillWidth: CGFloat, pillHeight: CGFloat) {
+    let barCount = 5
+    let barSpacing = pillHeight * 0.12
+    let totalBarsWidth = pillWidth * 0.4
+    let barWidth = (totalBarsWidth - (CGFloat(barCount - 1) * barSpacing)) / CGFloat(barCount)
+    let barsStartX = pillX + pillWidth * 0.5 - totalBarsWidth / 2
+
+    let barHeights: [CGFloat] = [0.35, 0.65, 0.85, 0.55, 0.45]
+
+    let barColors: [CGColor] = [
+        CGColor(red: 0.11, green: 0.73, blue: 0.33, alpha: 1.0),
+        CGColor(red: 0.15, green: 0.80, blue: 0.40, alpha: 1.0),
+        CGColor(red: 0.20, green: 0.85, blue: 0.45, alpha: 1.0),
+        CGColor(red: 0.15, green: 0.80, blue: 0.40, alpha: 1.0),
+        CGColor(red: 0.11, green: 0.73, blue: 0.33, alpha: 1.0)
+    ]
+
+    for index in 0..<barCount {
+        let barX = barsStartX + CGFloat(index) * (barWidth + barSpacing)
+        let maxBarHeight = pillHeight * 0.65
+        let barHeight = maxBarHeight * barHeights[index]
+        let barY = pillY + (pillHeight - barHeight) / 2
+        let barRect = CGRect(x: barX, y: barY, width: barWidth, height: barHeight)
+        let barCornerRadius = barWidth / 2
+        let barPath = CGPath(roundedRect: barRect, cornerWidth: barCornerRadius, cornerHeight: barCornerRadius, transform: nil)
+
+        context.saveGState()
+        context.addPath(barPath)
+        context.setFillColor(barColors[index])
+        context.fillPath()
+
+        context.addPath(barPath)
+        context.setShadow(offset: CGSize(width: 0, height: 0), blur: size * 0.02, color: barColors[index].copy(alpha: 0.6))
+        context.setFillColor(barColors[index])
+        context.fillPath()
+        context.restoreGState()
+    }
+}
+
 func drawIcon(size: CGFloat) -> NSImage {
     let image = NSImage(size: NSSize(width: size, height: size))
 
@@ -81,45 +120,7 @@ func drawIcon(size: CGFloat) -> NSImage {
     context.restoreGState()
 
     // Draw equalizer bars inside the pill
-    let barCount = 5
-    let barSpacing = pillHeight * 0.12
-    let totalBarsWidth = pillWidth * 0.4
-    let barWidth = (totalBarsWidth - (CGFloat(barCount - 1) * barSpacing)) / CGFloat(barCount)
-    let barsStartX = pillX + pillWidth * 0.5 - totalBarsWidth / 2
-
-    // Bar heights (different for visual interest)
-    let barHeights: [CGFloat] = [0.35, 0.65, 0.85, 0.55, 0.45]
-
-    // Spotify-inspired green colors with variations
-    let barColors: [CGColor] = [
-        CGColor(red: 0.11, green: 0.73, blue: 0.33, alpha: 1.0), // Spotify green
-        CGColor(red: 0.15, green: 0.80, blue: 0.40, alpha: 1.0),
-        CGColor(red: 0.20, green: 0.85, blue: 0.45, alpha: 1.0),
-        CGColor(red: 0.15, green: 0.80, blue: 0.40, alpha: 1.0),
-        CGColor(red: 0.11, green: 0.73, blue: 0.33, alpha: 1.0)
-    ]
-
-    for i in 0..<barCount {
-        let barX = barsStartX + CGFloat(i) * (barWidth + barSpacing)
-        let maxBarHeight = pillHeight * 0.65
-        let barHeight = maxBarHeight * barHeights[i]
-        let barY = pillY + (pillHeight - barHeight) / 2
-        let barRect = CGRect(x: barX, y: barY, width: barWidth, height: barHeight)
-        let barCornerRadius = barWidth / 2
-        let barPath = CGPath(roundedRect: barRect, cornerWidth: barCornerRadius, cornerHeight: barCornerRadius, transform: nil)
-
-        context.saveGState()
-        context.addPath(barPath)
-        context.setFillColor(barColors[i])
-        context.fillPath()
-
-        // Add subtle glow to bars
-        context.addPath(barPath)
-        context.setShadow(offset: CGSize(width: 0, height: 0), blur: size * 0.02, color: barColors[i].copy(alpha: 0.6))
-        context.setFillColor(barColors[i])
-        context.fillPath()
-        context.restoreGState()
-    }
+    drawEqualizerBars(context: context, size: size, pillX: pillX, pillY: pillY, pillWidth: pillWidth, pillHeight: pillHeight)
 
     // Add small music note icon on the left side of pill
     let noteSize = pillHeight * 0.45

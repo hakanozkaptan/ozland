@@ -3,7 +3,7 @@
 
 A beautiful macOS menu bar application that displays the currently playing Spotify track in a floating Dynamic Island-style interface at the top of your screen.
 
-[![Buy Me A Coffee](https://img.buymeacoffee.com/button-api/?text=Buy%20me%20a%20coffee&emoji=&slug=tijNJ98&button_colour=FFDD00&font_colour=000000&font_family=Cookie&outline_colour=000000&coffee_colour=ffffff)](https://www.buymeacoffee.com/tijNJ98)
+<a href="https://www.buymeacoffee.com/tijNJ98" target="_blank"><img src="https://img.buymeacoffee.com/button-api/?text=Buy%20me%20a%20coffee&emoji=&slug=tijNJ98&button_colour=FFDD00&font_colour=000000&font_family=Cookie&outline_colour=000000&coffee_colour=ffffff" alt="Buy Me A Coffee" /></a>
 
 ## Screenshots
 

@@ -19,7 +19,7 @@ struct DynamicIslandView: View {
     // MARK: - Initialization
     
     init(appState: AppState) {
-        self.appState = appState
+        _appState = ObservedObject(wrappedValue: appState)
     }
 
     var body: some View {

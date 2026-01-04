@@ -43,7 +43,9 @@ final class SpotifyManager: ObservableObject {
                     set playerPosition to player position
                     set trackId to id of current track
                     set artworkURL to artwork url of current track
-                    return currentTrack & "||" & currentArtist & "||" & currentAlbum & "||" & playerState & "||" & (trackDuration as string) & "||" & (playerPosition as string) & "||" & trackId & "||" & artworkURL
+                    set resultString to currentTrack & "||" & currentArtist & "||" & currentAlbum & "||" & playerState & "||" & (trackDuration as string) & "||" & (playerPosition as string)
+                    set resultString to resultString & "||" & trackId & "||" & artworkURL
+                    return resultString
                 on error
                     return "ERROR||ERROR||ERROR||stopped||0||0||||"
                 end try

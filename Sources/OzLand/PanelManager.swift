@@ -117,11 +117,11 @@ final class PanelManager: ObservableObject {
         
         let screenWidth = screen.frame.width
         let panelWidth = panel.frame.width
-        let x = screen.frame.minX + (screenWidth / 2) - (panelWidth / 2)
+        let positionX = screen.frame.minX + (screenWidth / 2) - (panelWidth / 2)
         // Always align to top (maxY is the top of the screen in Cocoa coordinate system)
-        let y = screen.frame.maxY - Constants.height
+        let positionY = screen.frame.maxY - Constants.height
         
-        panel.setFrameOrigin(NSPoint(x: x, y: y))
+        panel.setFrameOrigin(NSPoint(x: positionX, y: positionY))
     }
     
     func updatePosition() {
