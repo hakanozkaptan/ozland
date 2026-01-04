@@ -42,6 +42,7 @@ enum AppLanguage: String, CaseIterable {
 }
 
 /// Manages application state including theme and language preferences
+@MainActor
 final class AppState: ObservableObject {
     // MARK: - Published Properties
     

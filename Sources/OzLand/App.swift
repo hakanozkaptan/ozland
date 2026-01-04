@@ -19,6 +19,7 @@ struct OzLandApp: App {
 
 // MARK: - AppDelegate
 
+@MainActor
 final class AppDelegate: NSObject, NSApplicationDelegate {
     // MARK: - Properties
     

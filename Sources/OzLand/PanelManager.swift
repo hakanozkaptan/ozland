@@ -4,14 +4,15 @@ import QuartzCore
 import Combine
 
 /// Manages the floating NSPanel window for Dynamic Island UI
+@MainActor
 final class PanelManager: ObservableObject {
     // MARK: - Properties
     
     private var panel: NSPanel?
     private var hostingView: Any?
     weak var spotifyManager: SpotifyManager?
-    private var screenChangeObserver: NSObjectProtocol?
-    private var themeObserver: AnyCancellable?
+    nonisolated(unsafe) private var screenChangeObserver: NSObjectProtocol?
+    nonisolated(unsafe) private var themeObserver: AnyCancellable?
     private var isManuallyHidden: Bool = false
     
     private enum Constants {

@@ -3,7 +3,7 @@
 
 A beautiful macOS menu bar application that displays the currently playing Spotify track in a floating Dynamic Island-style interface at the top of your screen.
 
-<a href="https://www.buymeacoffee.com/tijNJ98"><img src="https://img.buymeacoffee.com/button-api/?text=Buy me a coffee&emoji=&slug=tijNJ98&button_colour=FFDD00&font_colour=000000&font_family=Cookie&outline_colour=000000&coffee_colour=ffffff" /></a>
+[![Buy Me A Coffee](https://img.buymeacoffee.com/button-api/?text=Buy%20me%20a%20coffee&emoji=&slug=tijNJ98&button_colour=FFDD00&font_colour=000000&font_family=Cookie&outline_colour=000000&coffee_colour=ffffff)](https://www.buymeacoffee.com/tijNJ98)
 
 ## Screenshots
 
@@ -101,6 +101,3 @@ Contributions are welcome! Please follow the existing code style and architectur
 4. Push to the branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
 
-## License
-
-This project is open source. See the [LICENSE](LICENSE) file for details.

@@ -26,7 +26,7 @@ jobs:
       - name: Set up Swift
         uses: swift-actions/setup-swift@v2
         with:
-          swift-version: "5.9"
+          swift-version: "6.0"
 
       - name: Get version
         id: version
@@ -91,8 +91,8 @@ jobs:
           /usr/libexec/PlistBuddy -c "Add :CFBundleIconFile string AppIcon" OzLand.app/Contents/Info.plist 2>/dev/null || \
             /usr/libexec/PlistBuddy -c "Set :CFBundleIconFile AppIcon" OzLand.app/Contents/Info.plist
 
-          /usr/libexec/PlistBuddy -c "Add :LSMinimumSystemVersion string 13.0" OzLand.app/Contents/Info.plist 2>/dev/null || \
-            /usr/libexec/PlistBuddy -c "Set :LSMinimumSystemVersion 13.0" OzLand.app/Contents/Info.plist
+          /usr/libexec/PlistBuddy -c "Add :LSMinimumSystemVersion string 14.0" OzLand.app/Contents/Info.plist 2>/dev/null || \
+            /usr/libexec/PlistBuddy -c "Set :LSMinimumSystemVersion 14.0" OzLand.app/Contents/Info.plist
 
           /usr/libexec/PlistBuddy -c "Add :LSUIElement bool true" OzLand.app/Contents/Info.plist 2>/dev/null || \
             /usr/libexec/PlistBuddy -c "Set :LSUIElement true" OzLand.app/Contents/Info.plist
@@ -150,7 +150,7 @@ jobs:
 
             ### Requirements
 
-            - macOS 13.0 (Ventura) or later
+            - macOS 14.0 (Sonoma) or later
             - Spotify Desktop App
           generate_release_notes: true
           draft: false

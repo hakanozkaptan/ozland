@@ -2,6 +2,7 @@ import Foundation
 import AppKit
 
 /// Manages Spotify integration via AppleScript
+@MainActor
 final class SpotifyManager: ObservableObject {
     // MARK: - Published Properties
     
@@ -17,8 +18,8 @@ final class SpotifyManager: ObservableObject {
     
     // MARK: - Private Properties
     
-    private var timer: Timer?
-    private var positionTimer: Timer?
+    nonisolated(unsafe) private var timer: Timer?
+    nonisolated(unsafe) private var positionTimer: Timer?
     private var currentArtworkURL: String = ""
 
     private enum Constants {
@@ -218,12 +219,12 @@ final class SpotifyManager: ObservableObject {
         }
     }
 
-    private func stopPolling() {
+    nonisolated private func stopPolling() {
         timer?.invalidate()
         timer = nil
     }
 
-    private func stopPositionPolling() {
+    nonisolated private func stopPositionPolling() {
         positionTimer?.invalidate()
         positionTimer = nil
     }
